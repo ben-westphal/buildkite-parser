@@ -1,0 +1,292 @@
+env:
+  BUILDKITE_ARTIFACT_UPLOAD_DESTINATION: s3://vivi-buildkite-artifacts/$BUILDKITE_JOB_ID
+  BUILDKITE_S3_DEFAULT_REGION: ap-southeast-2
+
+steps:
+  - label: ':react: Test'
+    key: test
+    agents:
+      queue: v3
+    command: .buildkite/scripts/test.sh
+    plugins:
+      - viviedu/docker-compose#dd0a3f4:
+          config: .buildkite/docker-compose.buildkite.yml
+          build: build
+          image-repository: ${GLOBAL_DOCKER_REGISTRY}/build-cache
+          image-name: ${BUILDKITE_PIPELINE_SLUG}-build
+          cache-from: build:${GLOBAL_DOCKER_REGISTRY}/build-cache:${BUILDKITE_PIPELINE_SLUG}-build
+          run: build
+          volumes:
+            - ./:/workspace
+      - artifacts#v1.2.0:
+          upload: coverage/**/*
+
+  - input: "Deploy to Staging"
+    key: staging_plan_input
+
+  - label: ':terraform: :thinking_face: Staging plan'
+    key: staging_plan
+    depends_on:
+      - test
+      - staging_plan_input
+    agents:
+      queue: v3
+    command: plan -var-file="var-files/staging.tfvars" -out="build/staging.tfplan"
+    plugins:
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: terraform
+          env:
+            - ENVIRONMENT=staging
+            - TF_BACKEND_S3_REGION=${GLOBAL_TF_BACKEND_S3_REGION}
+            - TF_BACKEND_S3_BUCKET=${GLOBAL_TF_BACKEND_S3_BUCKET}
+            - TF_BACKEND_S3_DYNAMODB_TABLE=${GLOBAL_TF_BACKEND_S3_DYNAMODB_TABLE}
+            - TF_BACKEND_S3_KEY=${BUILDKITE_PIPELINE_SLUG}.tfstate
+            - TF_VAR_aws_account_id=${GLOBAL_STAGING_AWS_ACCOUNT_ID}
+            - TF_VAR_application_name=${BUILDKITE_PIPELINE_SLUG}
+          volumes:
+            - ./:/workspace
+      - artifacts#v1.2.0:
+          upload: terraform/build/staging.tfplan
+
+  - label: ':terraform: :rocket: Staging apply'
+    key: staging_apply
+    depends_on:
+      - staging_plan
+    agents:
+      queue: v3
+    command: apply build/staging.tfplan
+    plugins:
+      - artifacts#v1.2.0:
+          download: terraform/build/staging.tfplan
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: terraform
+          env:
+            - ENVIRONMENT=staging
+            - TF_BACKEND_S3_REGION=${GLOBAL_TF_BACKEND_S3_REGION}
+            - TF_BACKEND_S3_BUCKET=${GLOBAL_TF_BACKEND_S3_BUCKET}
+            - TF_BACKEND_S3_DYNAMODB_TABLE=${GLOBAL_TF_BACKEND_S3_DYNAMODB_TABLE}
+            - TF_BACKEND_S3_KEY=${BUILDKITE_PIPELINE_SLUG}.tfstate
+            - TF_VAR_aws_account_id=${GLOBAL_STAGING_AWS_ACCOUNT_ID}
+            - TF_VAR_application_name=${BUILDKITE_PIPELINE_SLUG}
+          volumes:
+            - ./:/workspace
+
+  - label: ':s3: :rocket: Staging deploy'
+    key: staging_deploy
+    depends_on:
+      - staging_apply
+    agents:
+      queue: thicc
+    command: .buildkite/scripts/deploy.sh
+    plugins:
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: build
+          env:
+            - ENVIRONMENT=staging
+            - APPLICATION=${BUILDKITE_PIPELINE_SLUG}
+            - AWS_ACCOUNT_ID=${GLOBAL_STAGING_AWS_ACCOUNT_ID}
+            - SENTRY_AUTH_TOKEN=${GLOBAL_SENTRY_AUTH_TOKEN}
+            - SENTRY_ORG=${GLOBAL_SENTRY_ORG}
+            - SENTRY_PROJECT=${GLOBAL_STAGING_SENTRY_PROJECT}
+            - REACT_APP_GOOGLE_ANALYTICS_TRACKING_ID=${GLOBAL_STAGING_GOOGLE_ANALYTICS_TRACKING_ID}
+            - REACT_APP_SENTRY_DSN=${GLOBAL_STAGING_SENTRY_DSN}
+            - REACT_APP_GIT_HASH=${BUILDKITE_COMMIT}
+            - REACT_APP_API_URL=${GLOBAL_STAGING_BACKEND_ENDPOINT}/api/v2
+            - REACT_APP_ORIGIN=${GLOBAL_STAGING_BACKEND_ENDPOINT}
+            - REACT_APP_URL=https://admin-staging.vivi.io
+            - REACT_APP_PRODUCT_BOARD_JWT_SECRET=${GLOBAL_PRODUCT_BOARD_JWT_SECRET}
+            - REACT_APP_PRODUCT_BOARD_URL=${GLOBAL_PRODUCT_BOARD_URL}
+            - REACT_APP_VIVI_DISPLAY_URL=https://display-staging.vivi.io
+          volumes:
+            - ./:/workspace
+
+  - label: ':terraform: :thinking_face: Prod plan'
+    key: prod_plan
+    branches: 'release'
+    depends_on:
+      - test
+    agents:
+      queue: v3
+    command: plan -var-file="var-files/prod.tfvars" -out="build/prod.tfplan"
+    plugins:
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: terraform
+          env:
+            - ENVIRONMENT=prod
+            - TF_BACKEND_S3_REGION=${GLOBAL_TF_BACKEND_S3_REGION}
+            - TF_BACKEND_S3_BUCKET=${GLOBAL_TF_BACKEND_S3_BUCKET}
+            - TF_BACKEND_S3_DYNAMODB_TABLE=${GLOBAL_TF_BACKEND_S3_DYNAMODB_TABLE}
+            - TF_BACKEND_S3_KEY=${BUILDKITE_PIPELINE_SLUG}.tfstate
+            - TF_VAR_aws_account_id=${GLOBAL_PROD_AWS_ACCOUNT_ID}
+            - TF_VAR_application_name=${BUILDKITE_PIPELINE_SLUG}
+          volumes:
+            - ./:/workspace
+      - artifacts#v1.2.0:
+          upload: terraform/build/prod.tfplan
+
+  - label: ':terraform: :rocket: Prod apply'
+    key: prod_apply
+    branches: 'release'
+    depends_on:
+      - prod_plan
+    agents:
+      queue: v3
+    command: apply build/prod.tfplan
+    plugins:
+      - artifacts#v1.2.0:
+          download: terraform/build/prod.tfplan
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: terraform
+          env:
+            - ENVIRONMENT=prod
+            - TF_BACKEND_S3_REGION=${GLOBAL_TF_BACKEND_S3_REGION}
+            - TF_BACKEND_S3_BUCKET=${GLOBAL_TF_BACKEND_S3_BUCKET}
+            - TF_BACKEND_S3_DYNAMODB_TABLE=${GLOBAL_TF_BACKEND_S3_DYNAMODB_TABLE}
+            - TF_BACKEND_S3_KEY=${BUILDKITE_PIPELINE_SLUG}.tfstate
+            - TF_VAR_aws_account_id=${GLOBAL_PROD_AWS_ACCOUNT_ID}
+            - TF_VAR_application_name=${BUILDKITE_PIPELINE_SLUG}
+          volumes:
+            - ./:/workspace
+
+  - label: ':s3: :rocket: Prod deploy'
+    key: prod_deploy
+    branches: 'release'
+    depends_on:
+      - prod_apply
+    agents:
+      queue: thicc
+    command: .buildkite/scripts/deploy.sh
+    plugins:
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: build
+          env:
+            - ENVIRONMENT=prod
+            - APPLICATION=${BUILDKITE_PIPELINE_SLUG}
+            - AWS_ACCOUNT_ID=${GLOBAL_PROD_AWS_ACCOUNT_ID}
+            - SENTRY_AUTH_TOKEN=${GLOBAL_SENTRY_AUTH_TOKEN}
+            - SENTRY_ORG=${GLOBAL_SENTRY_ORG}
+            - SENTRY_PROJECT=${GLOBAL_PROD_SENTRY_PROJECT}
+            - REACT_APP_GOOGLE_ANALYTICS_TRACKING_ID=${GLOBAL_PROD_GOOGLE_ANALYTICS_TRACKING_ID}
+            - REACT_APP_SENTRY_DSN=${GLOBAL_PROD_SENTRY_DSN}
+            - REACT_APP_GIT_HASH=${BUILDKITE_COMMIT}
+            - REACT_APP_API_URL=${GLOBAL_PROD_BACKEND_ENDPOINT}/api/v2
+            - REACT_APP_ORIGIN=${GLOBAL_PROD_BACKEND_ENDPOINT}
+            - REACT_APP_URL=https://admin.vivi.io
+            - REACT_APP_PRODUCT_BOARD_JWT_SECRET=${GLOBAL_PRODUCT_BOARD_JWT_SECRET}
+            - REACT_APP_PRODUCT_BOARD_URL=${GLOBAL_PRODUCT_BOARD_URL}
+            - REACT_APP_VIVI_DISPLAY_URL=https://display.vivi.io
+          volumes:
+            - ./:/workspace
+
+  - label: ":python: Generate Changelog"
+    key: generate_changelog
+    branches: 'release'
+    depends_on:
+      - prod_deploy
+    agents:
+      queue: v3
+    command: .buildkite/scripts/changelog.sh
+    plugins:
+      - docker-compose#v4.7.0:
+          config: .buildkite/docker-compose.buildkite.yml
+          env:
+            - BUILDKITE_BUILD_CREATOR_EMAIL
+            - BUILDKITE_BUILD_NUMBER
+            - BUILDKITE_COMMIT
+            - BUILDKITE_PIPELINE_NAME
+            - GLOBAL_GITHUB_TOKEN
+            - GLOBAL_ATLASSIAN_LOGIN
+            - GLOBAL_ATLASSIAN_TOKEN
+          run: changelog
+          volumes:
+            - ./artifacts:/workspace/artifacts
+      - artifacts#v1.8.0:
+          upload:
+            - artifacts/*.csv
+
+  - input: 'Design Sync'
+    key: designsync_plan_input
+
+  - label: ':terraform: :thinking_face: Design Sync plan'
+    key: designsync_plan
+    depends_on:
+      - test
+      - designsync_plan_input
+    agents:
+      queue: v3
+    command: plan -var-file="var-files/designsync.tfvars" -out="build/designsync.tfplan"
+    plugins:
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: terraform
+          env:
+            - ENVIRONMENT=designsync
+            - TF_BACKEND_S3_REGION=${GLOBAL_TF_BACKEND_S3_REGION}
+            - TF_BACKEND_S3_BUCKET=${GLOBAL_TF_BACKEND_S3_BUCKET}
+            - TF_BACKEND_S3_DYNAMODB_TABLE=${GLOBAL_TF_BACKEND_S3_DYNAMODB_TABLE}
+            - TF_BACKEND_S3_KEY=${BUILDKITE_PIPELINE_SLUG}.tfstate
+            - TF_VAR_aws_account_id=${GLOBAL_STAGING_AWS_ACCOUNT_ID}
+            - TF_VAR_application_name=${BUILDKITE_PIPELINE_SLUG}
+          volumes:
+            - ./:/workspace
+      - artifacts#v1.2.0:
+          upload: terraform/build/designsync.tfplan
+
+  - label: ':terraform: :rocket: Design Sync apply'
+    key: designsync_apply
+    depends_on:
+      - designsync_plan
+    agents:
+      queue: v3
+    command: apply build/designsync.tfplan
+    plugins:
+      - artifacts#v1.2.0:
+          download: terraform/build/designsync.tfplan
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: terraform
+          env:
+            - ENVIRONMENT=designsync
+            - TF_BACKEND_S3_REGION=${GLOBAL_TF_BACKEND_S3_REGION}
+            - TF_BACKEND_S3_BUCKET=${GLOBAL_TF_BACKEND_S3_BUCKET}
+            - TF_BACKEND_S3_DYNAMODB_TABLE=${GLOBAL_TF_BACKEND_S3_DYNAMODB_TABLE}
+            - TF_BACKEND_S3_KEY=${BUILDKITE_PIPELINE_SLUG}.tfstate
+            - TF_VAR_aws_account_id=${GLOBAL_STAGING_AWS_ACCOUNT_ID}
+            - TF_VAR_application_name=${BUILDKITE_PIPELINE_SLUG}
+          volumes:
+            - ./:/workspace
+
+  - label: ':s3: :rocket: Design Sync deploy'
+    key: designsync_deploy
+    depends_on:
+      - designsync_apply
+    agents:
+      queue: thicc
+    command: .buildkite/scripts/deploy.sh
+    plugins:
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: build
+          env:
+            - ENVIRONMENT=designsync
+            - APPLICATION=${BUILDKITE_PIPELINE_SLUG}
+            - AWS_ACCOUNT_ID=${GLOBAL_STAGING_AWS_ACCOUNT_ID}
+            - SENTRY_AUTH_TOKEN=${GLOBAL_SENTRY_AUTH_TOKEN}
+            - SENTRY_ORG=${GLOBAL_SENTRY_ORG}
+            - SENTRY_PROJECT=${GLOBAL_STAGING_SENTRY_PROJECT}
+            - REACT_APP_GOOGLE_ANALYTICS_TRACKING_ID=${GLOBAL_STAGING_GOOGLE_ANALYTICS_TRACKING_ID}
+            - REACT_APP_SENTRY_DSN=${GLOBAL_STAGING_SENTRY_DSN}
+            - REACT_APP_GIT_HASH=${BUILDKITE_COMMIT}
+            - REACT_APP_API_URL=${GLOBAL_PROD_BACKEND_ENDPOINT}/api/v2
+            - REACT_APP_ORIGIN=${GLOBAL_PROD_BACKEND_ENDPOINT}
+            - REACT_APP_URL=https://admin-designsync.vivi.io
+            - REACT_APP_PRODUCT_BOARD_JWT_SECRET=${GLOBAL_PRODUCT_BOARD_JWT_SECRET}
+            - REACT_APP_PRODUCT_BOARD_URL=${GLOBAL_PRODUCT_BOARD_URL}
+          volumes:
+            - ./:/workspace
