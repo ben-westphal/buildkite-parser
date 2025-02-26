@@ -7,6 +7,13 @@ settings:
 importers:
 
   .:
+    dependencies:
+      tree-sitter:
+        specifier: ^0.22.4
+        version: 0.22.4
+      tree-sitter-yaml:
+        specifier: ^0.5.0
+        version: 0.5.0
     devDependencies:
       '@types/mocha':
         specifier: ^10.0.10
@@ -1127,11 +1134,22 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
+  nan@2.22.1:
+    resolution: {integrity: sha512-pfRR4ZcNTSm2ZFHaztuvbICf+hyiG6ecA06SfAxoPmuHjvMu0KUIae7Y8GyVkbBqeEIidsmXeYooWIX9+qjfRQ==}
+
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
   nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
+
+  node-addon-api@8.3.1:
+    resolution: {integrity: sha512-lytcDEdxKjGJPTLEfW4mYMigRezMlyJY8W4wxJK8zE533Jlb8L8dRuObJFWg2P+AuOIxoCgKF+2Oq4d4Zd0OUA==}
+    engines: {node: ^18 || ^20 || >= 21}
+
+  node-gyp-build@4.8.4:
+    resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
+    hasBin: true
 
   normalize-package-data@2.5.0:
     resolution: {integrity: sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA==}
@@ -1491,6 +1509,12 @@ packages:
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
+
+  tree-sitter-yaml@0.5.0:
+    resolution: {integrity: sha512-POJ4ZNXXSWIG/W4Rjuyg36MkUD4d769YRUGKRqN+sVaj/VCo6Dh6Pkssn1Rtewd5kybx+jT1BWMyWN0CijXnMA==}
+
+  tree-sitter@0.22.4:
+    resolution: {integrity: sha512-usbHZP9/oxNsUY65MQUsduGRqDHQOou1cagUSwjhoSYAmSahjQDAVsh9s+SlZkn8X8+O1FULRGwHu7AFP3kjzg==}
 
   ts-api-utils@2.0.1:
     resolution: {integrity: sha512-dnlgjFSVetynI8nzgJ+qF62efpglpWRk8isUEWZGWlJYySCTD6aKvbUDu+zbPeDakk3bg5H4XpitHukgfL1m9w==}
@@ -2806,9 +2830,15 @@ snapshots:
 
   ms@2.1.3: {}
 
+  nan@2.22.1: {}
+
   natural-compare@1.4.0: {}
 
   nice-try@1.0.5: {}
+
+  node-addon-api@8.3.1: {}
+
+  node-gyp-build@4.8.4: {}
 
   normalize-package-data@2.5.0:
     dependencies:
@@ -3220,6 +3250,15 @@ snapshots:
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
+
+  tree-sitter-yaml@0.5.0:
+    dependencies:
+      nan: 2.22.1
+
+  tree-sitter@0.22.4:
+    dependencies:
+      node-addon-api: 8.3.1
+      node-gyp-build: 4.8.4
 
   ts-api-utils@2.0.1(typescript@5.7.3):
     dependencies:
