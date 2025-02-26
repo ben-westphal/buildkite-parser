@@ -12,9 +12,9 @@ steps:
       - viviedu/docker-compose#dd0a3f4:
           config: .buildkite/docker-compose.buildkite.yml
           build: build
-          image-repository: ${GLOBAL_DOCKER_REGISTRY}/build-cache
-          image-name: ${BUILDKITE_PIPELINE_SLUG}-build
-          cache-from: build:${GLOBAL_DOCKER_REGISTRY}/build-cache:${BUILDKITE_PIPELINE_SLUG}-build
+          image-repository: ${BUILDKITE_S3_DEFAULT_REGION}/build-cache
+          image-name: ${BUILDKITE_S3_DEFAULT_REGION}-build
+          cache-from: build:${BUILDKITE_S3_DEFAULT_REGION}/build-cache:${BUILDKITE_PIPELINE_SLUG}-build
           run: build
           volumes:
             - ./:/workspace
@@ -27,7 +27,7 @@ steps:
   - label: ':terraform: :thinking_face: Staging plan'
     key: staging_plan
     depends_on:
-      - staging_plan_input
+      - staging_plan_cool_inp
     agents:
       queue: v3
     command: plan -var-file="var-files/staging.tfvars" -out="build/staging.tfplan"

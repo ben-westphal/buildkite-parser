@@ -33,8 +33,115 @@ interface StepElement {
   range: vscode.Range
 }
 
+interface EnvironmentVar {
+  name: string
+  lineNumber: number
+  range: vscode.Range
+  inDocument?: boolean
+}
+
 function getStep(document: Document, name: string) {
   return document.steps.find((step) => step.label.name === name);
+}
+
+export function getEnvironmentVariables(document: vscode.TextDocument): EnvironmentVar[] {
+  const lines = document.getText().split(/\r?\n/);
+  const envVars: EnvironmentVar[] = [];
+
+  let inEnvSection = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // thx gippity
+    if (/^\s*env\s*:/.test(line)) {
+      inEnvSection = true;
+      continue;
+    }
+
+    // thx gippity
+    if (inEnvSection && line.match(/^\S/)) {
+      break;
+    }
+
+    if (inEnvSection) {
+      const match = line.match(/^\s+([\w\d_]+)\s*:\s*(.+)$/); //thx gippity
+      if (match) {
+        const [_, varName] = match;
+
+        const startCharacter = line.indexOf(varName);
+        const endCharacter = startCharacter + varName.length;
+
+        envVars.push({
+          name: varName.trim(),
+          lineNumber: i,
+          range: new vscode.Range(
+            new vscode.Position(i, startCharacter),
+            new vscode.Position(i, endCharacter)
+          )
+        });
+      } else if (/^\s*\w/.test(line)) {
+        inEnvSection = false;
+      }
+    }
+  }
+
+  return envVars;
+}
+
+export function getDocumentEnvironmentVars(document: vscode.TextDocument): EnvironmentVar[] {
+  const lines = document.getText().split(/\r?\n/);
+  const embeddedVars: EnvironmentVar[] = [];
+
+  const envVarRegex = /\$\{([\w\d_]+)\}/g;
+
+  lines.forEach((line, lineNumber) => {
+    let match: RegExpExecArray | null;
+    const regex = /\$\{([\w\d_]+)\}/g;
+
+    while ((match = regex.exec(line)) !== null) {
+      const varName = match[1];
+      const startCharacter = match.index + 2; // skips '${'
+      const endCharacter = startCharacter + varName.length;
+
+      embeddedVars.push({
+        name: varName,
+        lineNumber: lineNumber,
+        range: new vscode.Range(
+          new vscode.Position(lineNumber, startCharacter),
+          new vscode.Position(lineNumber, endCharacter)
+        ),
+        inDocument: true
+      });
+    }
+  });
+
+  return embeddedVars;
+}
+
+
+function detectMisusedEnvVars(document: vscode.TextDocument, envVars: EnvironmentVar[]) {
+
+  return [];
+}
+
+function detectIncorrectEnvironmentVars(usedEnvVars: EnvironmentVar[], globalEnvVars: EnvironmentVar[]) {
+  const globalEnvVarNames = new Set(globalEnvVars.map(env => env.name));
+  const diagnostics: vscode.Diagnostic[] = [];
+
+  usedEnvVars.forEach(varUsed => {
+    if (!globalEnvVars.some(globalVar => globalVar.name === varUsed.name)) {
+
+      diagnostics.push(new vscode.Diagnostic(
+        varUsed.range,
+        `Environment variable "${varUsed.name}" is used but not defined in pipeline.`,
+        vscode.DiagnosticSeverity.Error
+      ));
+
+    }
+  });
+
+  return diagnostics;
 }
 
 function getDocumentStructure(document: vscode.TextDocument) {
@@ -117,10 +224,16 @@ function parseDocument(document: vscode.TextDocument) {
   }
 
   const parsedSteps = getDocumentStructure(document) || [];
-  const diagnostics: vscode.Diagnostic[] = checkForStepDependencies(parsedSteps);
-  console.log(`Found ${diagnostics.length} diagnostics for document`);
+  const parsedEnvVars = getEnvironmentVariables(document);
+  const usedEnvVariables = getDocumentEnvironmentVars(document);
+  console.log('Environment variables: ', parsedEnvVars);
+  console.log('Used Environment variables: ', usedEnvVariables);
 
-  diagnosticCollection.set(document.uri, diagnostics);
+  const diagnostics: vscode.Diagnostic[] = checkForStepDependencies(parsedSteps);
+  const envDiagnostics: vscode.Diagnostic[] = detectIncorrectEnvironmentVars(usedEnvVariables, parsedEnvVars);
+  console.log(`Found ${envDiagnostics.length} env diagnostics for document`);
+
+  diagnosticCollection.set(document.uri, diagnostics.concat(envDiagnostics));
 }
 
 function checkForStepDependencies(parsedSteps: BuildkiteStep[]) {
