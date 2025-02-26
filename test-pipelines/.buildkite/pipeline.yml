@@ -27,7 +27,6 @@ steps:
   - label: ':terraform: :thinking_face: Staging plan'
     key: staging_plan
     depends_on:
-      - tes
       - staging_plan_input
     agents:
       queue: v3
