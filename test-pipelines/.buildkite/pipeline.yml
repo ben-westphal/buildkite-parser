@@ -1,6 +1,8 @@
 env:
   BUILDKITE_ARTIFACT_UPLOAD_DESTINATION: s3://vivi-buildkite-artifacts/$BUILDKITE_JOB_ID
   BUILDKITE_S3_DEFAULT_REGION: ap-southeast-2
+  DELETE_DATABASE: vivi-primary
+  REALLY_COOL_ENVIRONMENT: super-cool-environment
 
 steps:
   - label: ':react: Test'
@@ -38,10 +40,47 @@ steps:
           env:
             - ENVIRONMENT=staging
             - TF_BACKEND_S3_REGION=${GLOBAL_TF_BACKEND_S3_REGION}
-            - TF_BACKEND_S3_BUCKET=${GLOBAL_TF_BACKEND_S3_BUCKET}
+          volumes:
+            - ./:/workspace
+      - artifacts#v1.2.0:
+          upload: terraform/build/staging.tfplan
+
+  - label: ':terraform: :thinking_face: Production plan'
+    key: staging_plan
+    depends_on:
+      - staging_plan_cool_inp
+    agents:
+      queue: v3
+    command: plan -var-file="var-files/staging.tfvars" -out="build/staging.tfplan"
+    plugins:
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: terraform
+          env:
+            - ENVIRONMENT=staging
             - TF_BACKEND_S3_DYNAMODB_TABLE=${GLOBAL_TF_BACKEND_S3_DYNAMODB_TABLE}
             - TF_BACKEND_S3_KEY=${BUILDKITE_PIPELINE_SLUG}.tfstate
             - TF_VAR_aws_account_id=${GLOBAL_STAGING_AWS_ACCOUNT_ID}
+            - TF_VAR_application_name=${BUILDKITE_PIPELINE_SLUG}
+          volumes:
+            - ./:/workspace
+      - artifacts#v1.2.0:
+          upload: terraform/build/staging.tfplan
+
+  - label: ':terraform: :thinking_face: Production plan'
+    key: delete_database_plan
+    depends_on:
+      - staging_plan_cool_inp
+    agents:
+      queue: v3
+    command: plan -var-file="var-files/staging.tfvars" -out="build/staging.tfplan"
+    plugins:
+      - docker-compose#v2.5.1:
+          config: .buildkite/docker-compose.buildkite.yml
+          run: terraform
+          env:
+            - ENVIRONMENT=staging
+            - DATABASE_TO_DELETE=${GLOBAL_TF_BACKEND_S3_REGION}
             - TF_VAR_application_name=${BUILDKITE_PIPELINE_SLUG}
           volumes:
             - ./:/workspace
