@@ -18,11 +18,6 @@
     "workspaceContains:buildkite.json",
     "workspaceContains:buildkite.*.yml",
     "workspaceContains:buildkite.*.yaml",
-    "workspaceContains:buildkite.yml",
-    "workspaceContains:buildkite.yaml",
-    "workspaceContains:buildkite.json",
-    "workspaceContains:buildkite.*.yml",
-    "workspaceContains:buildkite.*.yaml",
     "workspaceContains:buildkite.*.json",
     "workspaceContains:**/.buildkite/pipeline.yml",
     "workspaceContains:**/.buildkite/pipeline.yaml",
@@ -41,14 +36,15 @@
   "icon": "images/icon.png",
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "pnpm run check-types && pnpm run lint && node esbuild.js",
+    "prepare": "npm run compile",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
-    "package": "npm install && pnpm run check-types && pnpm run lint && node esbuild.js --production",
+    "package": "npm install && npm run check-types && npm run lint && node esbuild.js --production",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
     "test": "vscode-test",
@@ -56,8 +52,8 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "20.x",
-    "@types/vscode": "^1.95.0",
+    "@types/node": "~20.17.30",
+    "@types/vscode": "^1.99.1",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
     "@vscode/test-cli": "^0.0.10",
@@ -65,7 +61,6 @@
     "esbuild": "^0.24.2",
     "eslint": "^9.19.0",
     "npm-run-all": "^4.1.5",
-    "typescript": "^5.7.3"
-  },
-  "packageManager": "pnpm@9.7.1+sha512.faf344af2d6ca65c4c5c8c2224ea77a81a5e8859cbc4e06b1511ddce2f0151512431dd19e6aff31f2c6a8f5f2aced9bd2273e1fed7dd4de1868984059d2c4247"
+    "typescript": "^5.8.3"
+  }
 }
