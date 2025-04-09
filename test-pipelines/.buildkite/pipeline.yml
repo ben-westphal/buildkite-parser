@@ -48,7 +48,7 @@ steps:
   - label: ':terraform: :thinking_face: Production plan'
     key: staging_plan
     depends_on:
-      - staging_plan_cool_inp
+      - staging_plan_input
     agents:
       queue: v3
     command: plan -var-file="var-files/staging.tfvars" -out="build/staging.tfplan"
