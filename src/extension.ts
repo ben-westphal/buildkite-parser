@@ -53,13 +53,11 @@ export function getEnvironmentVariables(document: vscode.TextDocument): Environm
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // thx gippity
     if (/^\s*env\s*:/.test(line)) {
       inEnvSection = true;
       continue;
     }
 
-    // thx gippity
     if (inEnvSection && line.match(/^\S/)) {
       break;
     }

@@ -16,7 +16,7 @@ steps:
           build: build
           image-repository: ${BUILDKITE_S3_DEFAULT_REGION}/build-cache
           image-name: ${BUILDKITE_S3_DEFAULT_REGION}-build
-          cache-from: build:${BUILDKITE_S3_DEFAULT_REGION}/build-cache:${BUILDKITE_PIPELINE_SLUG}-build
+          cache-from: build:${BUILDKITE_S3_DEFAULT_REGION}/build-cache:${REALLY_COOL_ENVIRONMENT}-build
           run: build
           volumes:
             - ./:/workspace
@@ -29,7 +29,7 @@ steps:
   - label: ':terraform: :thinking_face: Staging plan'
     key: staging_plan
     depends_on:
-      - staging_plan_cool_inp
+      - staging_plan_input
     agents:
       queue: v3
     command: plan -var-file="var-files/staging.tfvars" -out="build/staging.tfplan"

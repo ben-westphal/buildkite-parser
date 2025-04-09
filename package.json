@@ -6,6 +6,7 @@
   "engines": {
     "vscode": "^1.97.0"
   },
+  "repository": "https://github.com/ben-westphal/buildkite-parser",
   "categories": [
     "Other"
   ],
@@ -37,18 +38,19 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run package",
+    "vscode:prepublish": "npm run package",
     "compile": "pnpm run check-types && pnpm run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
-    "package": "pnpm run check-types && pnpm run lint && node esbuild.js --production",
+    "package": "npm install && pnpm run check-types && pnpm run lint && node esbuild.js --production",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "build-version": "vsce package && mkdir -p dist && mv *.vsix dist/"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -64,8 +66,5 @@
     "typescript": "^5.7.3"
   },
   "packageManager": "pnpm@9.7.1+sha512.faf344af2d6ca65c4c5c8c2224ea77a81a5e8859cbc4e06b1511ddce2f0151512431dd19e6aff31f2c6a8f5f2aced9bd2273e1fed7dd4de1868984059d2c4247",
-  "dependencies": {
-    "tree-sitter": "^0.22.4",
-    "tree-sitter-yaml": "^0.5.0"
-  }
+  "dependencies": {}
 }
