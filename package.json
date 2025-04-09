@@ -2,9 +2,9 @@
   "name": "buildkite-parse",
   "displayName": "buildkite-parse",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
-    "vscode": "^1.9.0"
+    "vscode": "^1.95.0"
   },
   "repository": "https://github.com/ben-westphal/buildkite-parser",
   "categories": [
@@ -57,7 +57,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "@types/vscode": "^1.97.0",
+    "@types/vscode": "^1.95.0",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
     "@vscode/test-cli": "^0.0.10",
@@ -67,6 +67,5 @@
     "npm-run-all": "^4.1.5",
     "typescript": "^5.7.3"
   },
-  "packageManager": "pnpm@9.7.1+sha512.faf344af2d6ca65c4c5c8c2224ea77a81a5e8859cbc4e06b1511ddce2f0151512431dd19e6aff31f2c6a8f5f2aced9bd2273e1fed7dd4de1868984059d2c4247",
-  "dependencies": {}
+  "packageManager": "pnpm@9.7.1+sha512.faf344af2d6ca65c4c5c8c2224ea77a81a5e8859cbc4e06b1511ddce2f0151512431dd19e6aff31f2c6a8f5f2aced9bd2273e1fed7dd4de1868984059d2c4247"
 }
