@@ -2,7 +2,7 @@
   "name": "buildkite-parse",
   "displayName": "buildkite-parse",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha.1",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -37,6 +37,8 @@
       }
     ]
   },
+  "publisher": "TheDome",
+  "icon": "images/icon.png",
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "pnpm run check-types && pnpm run lint && node esbuild.js",

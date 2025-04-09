@@ -39,7 +39,7 @@ steps:
           run: terraform
           env:
             - ENVIRONMENT=staging
-            - TF_BACKEND_S3_REGION=${GLOBAL_TF_BACKEND_S3_REGION}
+            - TF_BACKEND_S3_REGION=${REALLY_COOL_ENVIRONMENT}
           volumes:
             - ./:/workspace
       - artifacts#v1.2.0:
