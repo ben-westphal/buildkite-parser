@@ -28,7 +28,13 @@
     "commands": [
       {
         "command": "buildkite-parse.helloWorld",
-        "title": "Fix Buildkite Pipeline"
+        "title": "Buildkite Parser Active"
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": ["bkparse.config.json"],
+        "url": "./src/schemas/bkparse.config.schema.json"
       }
     ]
   },

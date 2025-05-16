@@ -1,8 +1,8 @@
 env:
   BUILDKITE_ARTIFACT_UPLOAD_DESTINATION: s3://vivi-buildkite-artifacts/$BUILDKITE_JOB_ID
   BUILDKITE_S3_DEFAULT_REGION: ap-southeast-2
-  DELETE_DATABASE: vivi-primary
-  REALLY_COOL_ENVIRONMENT: super-cool-environment
+  DELETE_DATABASE: 'vivi-primary'
+  REALLY_COOL_ENVIRONMENT: "super-cool-environment"
 
 steps:
   - label: ':react: Test'
@@ -16,7 +16,7 @@ steps:
           build: build
           image-repository: ${BUILDKITE_S3_DEFAULT_REGION}/build-cache
           image-name: ${BUILDKITE_S3_DEFAULT_REGION}-build
-          cache-from: build:${BUILDKITE_S3_DEFAULT_REGION}/build-cache:${REALLY_COOL_ENVIRONMENT}-build
+          cache-from: build:${'BUILDKITE_S3_DEFAULT_REGION'}/build-cache:${REALLY_COOL_ENVIRONMENT}-build
           run: build
           volumes:
             - ./:/workspace
@@ -39,7 +39,7 @@ steps:
           run: terraform
           env:
             - ENVIRONMENT=staging
-            - TF_BACKEND_S3_REGION=${GLOBAL_TF_BACKEND_S3_REGION}
+            - TF_BACKEND_S3_REGION=${GLOBAL_TF_BACKEND_S3_EGIONs}
           volumes:
             - ./:/workspace
       - artifacts#v1.2.0:

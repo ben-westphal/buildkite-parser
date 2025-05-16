@@ -17,6 +17,7 @@ export class DependsOnRule implements Rule {
   private dependsOnRefs: DependsOnReference[] = [];
 
   initialize(): void {
+    console.log('DependsOnRule initialized', this.definedKeys.length);
     this.definedKeys = [];
     this.dependsOnRefs = [];
   }
@@ -72,6 +73,8 @@ export class DependsOnRule implements Rule {
       }
     }
 
+    this.definedKeys = [];
+    this.dependsOnRefs = [];
     return diagnostics;
   }
 }

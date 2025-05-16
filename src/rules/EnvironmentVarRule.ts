@@ -46,7 +46,6 @@ export class EnvironmentVarRule implements Rule {
 
   finalize(): vscode.Diagnostic[] {
     const diagnostics: vscode.Diagnostic[] = [];
-
     for (const used of this.usedEnvVars) {
       if (!this.definedEnvVars.has(used.name)) {
         diagnostics.push(new vscode.Diagnostic(
@@ -56,7 +55,9 @@ export class EnvironmentVarRule implements Rule {
         ));
       }
     }
-
+    this.definedEnvVars.clear();
+    this.usedEnvVars = [];
+    this.inEnvSection = false;
     return diagnostics;
   }
 }

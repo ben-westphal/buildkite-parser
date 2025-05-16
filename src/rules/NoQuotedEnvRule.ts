@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import { Rule } from '../types/rule';
 
-export class NoQuotedEnvValueRule implements Rule {
+export class NoQuotedEnvRule implements Rule {
   private violations: { name: string; range: vscode.Range }[] = [];
 
   initialize(): void {
+    console.log('NoQuotedEnvRule initialized');
     this.violations = [];
   }
 
@@ -29,10 +30,13 @@ export class NoQuotedEnvValueRule implements Rule {
   }
 
   finalize(): vscode.Diagnostic[] {
-    return this.violations.map(v => new vscode.Diagnostic(
+    const violations = this.violations.map(v => new vscode.Diagnostic(
       v.range,
       `Environment variable "${v.name}" should not be quoted.`,
       vscode.DiagnosticSeverity.Error
     ));
+
+    this.violations = [];
+    return violations;
   }
 }
