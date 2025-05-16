@@ -15,11 +15,7 @@ If you have any requirements or dependencies, add a section describing those and
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
+To change the settings of this extension create a config file inside your .buildkite folder.
 
 ## Known Issues
 

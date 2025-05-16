@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "DependsOnRule": true,
+    "EnvironmentVarRule": true,
+    "NoQuotedEnvRule": true
+  },
+  "excludedEnvs": ["CI", "PATH"]
+}

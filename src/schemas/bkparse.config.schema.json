@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Buildkite Parser Config",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "DependsOnRule":   { "type": "boolean" },
+        "EnvironmentVarRule": { "type": "boolean" },
+        "NoQuotedEnvRule": { "type": "boolean" }
+      }
+    },
+    "excludedEnvs": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
