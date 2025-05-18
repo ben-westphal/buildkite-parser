@@ -1,8 +1,8 @@
 {
   "rules": {
-    "DependsOnRule": true,
-    "EnvironmentVarRule": true,
-    "NoQuotedEnvRule": true
+    "DependsOnRule": false,
+    "EnvironmentVarRule": false,
+    "NoQuotedEnvRule": false
   },
   "excludedEnvs": ["CI", "PATH", "GLOBAL_TF_BACKEND_S3_REGION"]
 }

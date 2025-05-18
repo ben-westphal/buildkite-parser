@@ -55,6 +55,8 @@ export class EnvironmentVarRule implements Rule {
         ));
       }
     }
+    // TODO: Add flush function to each rule
+    // to clear the state after processing
     this.definedEnvVars.clear();
     this.usedEnvVars = [];
     this.inEnvSection = false;

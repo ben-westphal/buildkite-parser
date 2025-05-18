@@ -3,40 +3,63 @@ import { Rule } from '../types/rule';
 
 export class NoQuotedEnvRule implements Rule {
   private violations: { name: string; range: vscode.Range }[] = [];
+  private inEnvSection: boolean = false;
+  private envIndent: number = 0;
 
   initialize(): void {
     console.log('NoQuotedEnvRule initialized');
     this.violations = [];
+    this.inEnvSection = false;
+    this.envIndent = 0;
   }
 
   processLine(line: string, lineNumber: number): void {
-    const regex = /(['"])([A-Z][A-Z0-9_]+)\1/g;
-    let match: RegExpExecArray | null;
+    // Detect start of env section
+    const envHeaderMatch = /^([ \t]*)env:\s*$/.exec(line);
+    if (envHeaderMatch) {
+      this.inEnvSection = true;
+      this.envIndent = envHeaderMatch[1].length;
+      return;
+    }
 
-    while ((match = regex.exec(line)) !== null) {
-      const fullMatch = match[0];
-      const varName = match[2];
-      const startCol = match.index;
-      const endCol = startCol + fullMatch.length;
-
-      this.violations.push({
-        name: varName,
-        range: new vscode.Range(
-          new vscode.Position(lineNumber, startCol),
-          new vscode.Position(lineNumber, endCol)
-        )
-      });
+    if (this.inEnvSection) {
+      // Determine current line indentation
+      const indentMatch = /^([ \t]*)/.exec(line);
+      const currentIndent = indentMatch ? indentMatch[1].length : 0;
+      // Exit env section if outdented or new top-level key
+      if (currentIndent <= this.envIndent || (/^\s*\S+\s*:\s*/.test(line) && indentMatch && indentMatch[1].length <= this.envIndent)) {
+        this.inEnvSection = false;
+      } else {
+        // Inside env entries: check key: value pattern
+        const kvMatch = /^\s*([A-Z][A-Z0-9_]*)\s*:\s*(.+?)\s*(?:#.*)?$/.exec(line);
+        if (kvMatch) {
+          const varName = kvMatch[1];
+          const rawValue = kvMatch[2].trim();
+          // Check if value is quoted
+          const quoteMatch = /^(['"])(.*)\1$/.exec(rawValue);
+          if (quoteMatch) {
+            const startCol = line.indexOf(rawValue);
+            const endCol = startCol + rawValue.length;
+            this.violations.push({
+              name: varName,
+              range: new vscode.Range(
+                new vscode.Position(lineNumber, startCol),
+                new vscode.Position(lineNumber, endCol)
+              )
+            });
+          }
+        }
+      }
     }
   }
 
   finalize(): vscode.Diagnostic[] {
-    const violations = this.violations.map(v => new vscode.Diagnostic(
+    const diagnostics = this.violations.map(v => new vscode.Diagnostic(
       v.range,
-      `Environment variable "${v.name}" should not be quoted.`,
+      `Environment variable "${v.name}" could be incorrectly quoted.`,
       vscode.DiagnosticSeverity.Error
     ));
-
     this.violations = [];
-    return violations;
+    return diagnostics;
   }
 }
