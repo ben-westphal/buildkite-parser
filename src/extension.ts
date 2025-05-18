@@ -35,17 +35,14 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
       configWatcher,
       configWatcher.onDidChange(() => {
-        console.log('Config file changed, reloading...');
         parser.reloadConfig();
         vscode.workspace.textDocuments.forEach(parseDoc);
       }),
       configWatcher.onDidCreate(() => {
-        console.log('Config file created, loading...');
         parser.reloadConfig();
         vscode.workspace.textDocuments.forEach(parseDoc);
       }),
       configWatcher.onDidDelete(() => {
-        console.log('Config file deleted, resetting to defaults...');
         parser.reloadConfig();
         vscode.workspace.textDocuments.forEach(parseDoc);
       })

@@ -7,7 +7,6 @@ export class NoQuotedEnvRule implements Rule {
   private envIndent: number = 0;
 
   initialize(): void {
-    console.log('NoQuotedEnvRule initialized');
     this.violations = [];
     this.inEnvSection = false;
     this.envIndent = 0;

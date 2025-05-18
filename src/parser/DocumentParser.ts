@@ -47,7 +47,6 @@ export class DocumentParser {
       .filter(ruleConstructor => localConfig.rules?.[ruleConstructor.name] !== false)
       .map(ruleConstructor => new ruleConstructor(localConfig.excludedEnvs || []));
 
-    console.log('Active rules:', rules.map(rule => rule.constructor.name));
     rules.forEach(rule => rule.initialize(document));
 
     const lines = document.getText().split(/\r?\n/);
@@ -55,9 +54,7 @@ export class DocumentParser {
       rules.forEach(rule => rule.processLine(line, index));
     });
 
-    const diagnostics = rules.flatMap(rule => rule.finalize());
-    console.log('Diagnostics:', diagnostics.length);
-    return diagnostics;
+    return rules.flatMap(rule => rule.finalize());
   }
 
   private loadConfig(): Partial<ParserConfig> {
