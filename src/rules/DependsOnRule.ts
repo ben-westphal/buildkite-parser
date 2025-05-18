@@ -72,6 +72,8 @@ export class DependsOnRule implements Rule {
       }
     }
 
+    this.definedKeys = [];
+    this.dependsOnRefs = [];
     return diagnostics;
   }
 }

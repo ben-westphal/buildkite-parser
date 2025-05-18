@@ -2,26 +2,110 @@ import * as vscode from 'vscode';
 import { Rule } from '../types/rule';
 import { DependsOnRule } from '../rules/DependsOnRule';
 import { EnvironmentVarRule } from '../rules/EnvironmentVarRule';
+import path from 'path';
+import fs from 'fs';
+import { NoQuotedEnvRule } from '../rules/NoQuotedEnvRule';
+
+export interface ParserConfig {
+  rules?: Record<string, any>;
+  excludedEnvs?: string[];
+}
 
 export class DocumentParser {
-  private rules: Rule[] = [];
+  private config: ParserConfig = {};
 
-  constructor() {
-    this.rules = [
-      new DependsOnRule(),
-      new EnvironmentVarRule(),
-      // new KeyCheckRule(),
-    ];
+  public reloadConfig(): void {
+    const userConfig = this.loadConfig();
+    const defaults = this.defaultConfig();
+    this.config = {
+      rules: { ...defaults.rules, ...userConfig.rules },
+      excludedEnvs: userConfig.excludedEnvs || [],
+    };
+  }
+
+  private defaultConfig(): ParserConfig {
+    return {
+      rules: {
+        DependsOnRule: true,
+        EnvironmentVarRule: true,
+        NoQuotedEnvRule: true,
+      },
+      excludedEnvs: [],
+    };
   }
 
   parse(document: vscode.TextDocument): vscode.Diagnostic[] {
-    this.rules.forEach(rule => rule.initialize(document));
+    const localConfig = this.config;
+
+    const ruleConstructors: Array<new (excludedEnvs?: string[]) => Rule> = [
+      DependsOnRule,
+      EnvironmentVarRule,
+      NoQuotedEnvRule
+    ];
+
+    const rules = ruleConstructors
+      .filter(ruleConstructor => localConfig.rules?.[ruleConstructor.name] !== false)
+      .map(ruleConstructor => new ruleConstructor(localConfig.excludedEnvs || []));
+
+    rules.forEach(rule => rule.initialize(document, localConfig));
 
     const lines = document.getText().split(/\r?\n/);
     lines.forEach((line, index) => {
-      this.rules.forEach(rule => rule.processLine(line, index));
+      rules.forEach(rule => rule.processLine(line, index));
     });
 
-    return this.rules.flatMap(rule => rule.finalize());
+    return rules.flatMap(rule => rule.finalize());
+  }
+
+  private loadConfig(): Partial<ParserConfig> {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders?.length) {
+      return {};
+    }
+
+    const root = folders[0].uri.fsPath;
+    const configPath = path.join(root, '.buildkite', 'bkparse.config.json');
+    if (!fs.existsSync(configPath)) {
+      return {};
+    }
+
+    try {
+      const raw = fs.readFileSync(configPath, 'utf8');
+      const parsed = JSON.parse(raw);
+
+      const allowedRoot = new Set(['rules', 'excludedEnvs']);
+      for (const key of Object.keys(parsed)) {
+        if (!allowedRoot.has(key)) {
+          throw new Error(`Unknown property "${key}" in bkparse.config.json`);
+        }
+      }
+
+      const allowedRules = new Set([
+        'DependsOnRule',
+        'EnvironmentVarRule',
+        'NoQuotedEnvRule'
+      ]);
+
+      if (parsed.rules) {
+        for (const r of Object.keys(parsed.rules)) {
+          if (!allowedRules.has(r)) {
+            throw new Error(`Unknown rule "${r}" in bkparse.config.json.rules`);
+          }
+        }
+      }
+
+      if (parsed.excludedEnvs && !Array.isArray(parsed.excludedEnvs)) {
+        throw new Error(`"excludedEnvs" must be an array in bkparse.config.json`);
+      }
+
+      return {
+        rules: parsed.rules,
+        excludedEnvs: parsed.excludedEnvs,
+      };
+    } catch (err: unknown) {
+      const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : err;
+      console.error('Failed loading config:', message);
+      return {};
+    }
   }
 }

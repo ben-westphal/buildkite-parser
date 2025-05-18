@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
 import { Rule } from '../types/rule';
+import { ParserConfig } from '../parser/DocumentParser';
 
 export class EnvironmentVarRule implements Rule {
   private definedEnvVars: Set<string> = new Set();
   private usedEnvVars: { name: string, range: vscode.Range }[] = [];
   private inEnvSection = false;
 
-  initialize(): void {
-    this.definedEnvVars.clear();
+  initialize(_document: vscode.TextDocument, config: ParserConfig): void {
+    this.definedEnvVars = new Set(config.excludedEnvs || []);
     this.usedEnvVars = [];
     this.inEnvSection = false;
   }
@@ -46,7 +47,6 @@ export class EnvironmentVarRule implements Rule {
 
   finalize(): vscode.Diagnostic[] {
     const diagnostics: vscode.Diagnostic[] = [];
-
     for (const used of this.usedEnvVars) {
       if (!this.definedEnvVars.has(used.name)) {
         diagnostics.push(new vscode.Diagnostic(
@@ -56,7 +56,11 @@ export class EnvironmentVarRule implements Rule {
         ));
       }
     }
-
+    // TODO: Add flush function to each rule
+    // to clear the state after processing
+    this.definedEnvVars.clear();
+    this.usedEnvVars = [];
+    this.inEnvSection = false;
     return diagnostics;
   }
 }

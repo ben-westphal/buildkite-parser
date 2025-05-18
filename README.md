@@ -1,35 +1,52 @@
-# buildkite-parse README
+# Buildkite Parse
 
-BuildkiteParse is a simple vscode extension that provides additional syntax highlighting to features specific to buildkite pipeline.yml files that cannot be provided by simple json schemas.
+BuildkiteParse is a simple vscode extension that provides additional syntax highlighting to features specific
+to buildkite pipeline.yml files that cannot be provided by simple json schemas.
 
 ## Features
 
 Current features include the following:
 
-1. Syntax highlighting for incorrectly used environment variables
-2. Depends_on step highlighting
+1. Syntax highlighting for incorrectly used environment variables - mispelt or missing environment variables are highlighted
+2. Depends_on step highlighting - ensures each step in your pipeline with a depends_on is used earlier in the pipeline
+3. No quoted environment variables - ensures environment vars are not accidentally quoted
 
-## Requirements
+## Configuration
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+To configure the extension create a file called `bkparse.config.json` in your .buildkite directory.
+This file has type hinting for a better dx.
 
-## Extension Settings
+```
+{
+  "rules": {
+    "DependsOnRule": false,
+    "EnvironmentVarRule": false,
+    "NoQuotedEnvRule": true
+  },
+  "excludedEnvs": ["CI", "PATH", "GLOBAL_TF_BACKEND_S3_REGION"]
+}
+```
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+ExcludedEnvs should be environment variables that you may be injecting from outside the pipeline. Add them to this array to exempt them from the `EnvironmentVarRule`.
 
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
 
 ## Known Issues
 
-1. Depends_on parsing is a little broken at the moment
+None right now, create an issue if you find anything!
 
-## Release Notes
+# Release Notes
 
-Users appreciate release notes as you update your extension.
+## 0.0.4
 
-###
+* Added new rule allowing the user to check environment variables for quotes that would be included in the string.
+
+Eg: It will provide a warning for the following: `REALLY_COOL_ENVIRONMENT: "super-cool-environment"` as the double quotes will end up included in the string.
+This often happens when someone copy pastes the variable from another environment which will parse the quoting as expected.
+It can be turned on and off in your config file with the value `NoQuotedEnvRule: boolean`
+
+* Added a config file
+
+This config file can be added to your .buildkite directory to turn specific rules on and off, as well as add in external environment variables that may be injected from outside your pipeline.
 
 ---
 
@@ -47,17 +64,6 @@ Or you can throw a buildkite pipeline in there to have a play with.
 
 Below are the current features in development
 
-1. Settings for environment variables allowing the user to provide vars that are inserted externally to the pipeline.yml file itself.
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Other info
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+* Allow parsing of bash scripts that generate pipeline files
+* Add tests for all rules
+* Npm install it as a package instead
