@@ -60,6 +60,8 @@ This will open a vscode instance with the extension running. The test-pipelines 
 
 Or you can throw a buildkite pipeline in there to have a play with.
 
+## Building from source
+
 ## Roadmap
 
 Below are the current features in development
@@ -67,3 +69,5 @@ Below are the current features in development
 * Allow parsing of bash scripts that generate pipeline files
 * Add tests for all rules
 * Npm install it as a package instead
+* Migrate to pnpm for package installation
+* Add github action to handle publishing versions
