@@ -12,18 +12,7 @@ interface ParserConfig {
 }
 
 export class DocumentParser {
-  private rules: Rule[] = [];
   private config: ParserConfig = {};
-
-  constructor() {
-    this.rules = [
-      new DependsOnRule(),
-      new EnvironmentVarRule(),
-      new NoQuotedEnvRule(),
-    ];
-
-    this.reloadConfig();
-  }
 
   public reloadConfig(): void {
     const userConfig = this.loadConfig();
@@ -63,10 +52,10 @@ export class DocumentParser {
 
     const lines = document.getText().split(/\r?\n/);
     lines.forEach((line, index) => {
-      this.rules.forEach(rule => rule.processLine(line, index));
+      rules.forEach(rule => rule.processLine(line, index));
     });
 
-    const diagnostics = this.rules.flatMap(rule => rule.finalize());
+    const diagnostics = rules.flatMap(rule => rule.finalize());
     console.log('Diagnostics:', diagnostics.length);
     return diagnostics;
   }

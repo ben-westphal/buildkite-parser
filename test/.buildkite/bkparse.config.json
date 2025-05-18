@@ -2,7 +2,7 @@
   "rules": {
     "DependsOnRule": false,
     "EnvironmentVarRule": false,
-    "NoQuotedEnvRule": false
+    "NoQuotedEnvRule": true
   },
   "excludedEnvs": ["CI", "PATH", "GLOBAL_TF_BACKEND_S3_REGION"]
 }

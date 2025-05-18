@@ -14,7 +14,6 @@ export class NoQuotedEnvRule implements Rule {
   }
 
   processLine(line: string, lineNumber: number): void {
-    // Detect start of env section
     const envHeaderMatch = /^([ \t]*)env:\s*$/.exec(line);
     if (envHeaderMatch) {
       this.inEnvSection = true;
@@ -23,19 +22,16 @@ export class NoQuotedEnvRule implements Rule {
     }
 
     if (this.inEnvSection) {
-      // Determine current line indentation
       const indentMatch = /^([ \t]*)/.exec(line);
       const currentIndent = indentMatch ? indentMatch[1].length : 0;
-      // Exit env section if outdented or new top-level key
+
       if (currentIndent <= this.envIndent || (/^\s*\S+\s*:\s*/.test(line) && indentMatch && indentMatch[1].length <= this.envIndent)) {
         this.inEnvSection = false;
       } else {
-        // Inside env entries: check key: value pattern
-        const kvMatch = /^\s*([A-Z][A-Z0-9_]*)\s*:\s*(.+?)\s*(?:#.*)?$/.exec(line);
-        if (kvMatch) {
-          const varName = kvMatch[1];
-          const rawValue = kvMatch[2].trim();
-          // Check if value is quoted
+        const keyValMatch = /^\s*([A-Z][A-Z0-9_]*)\s*:\s*(.+?)\s*(?:#.*)?$/.exec(line);
+        if (keyValMatch) {
+          const varName = keyValMatch[1];
+          const rawValue = keyValMatch[2].trim();
           const quoteMatch = /^(['"])(.*)\1$/.exec(rawValue);
           if (quoteMatch) {
             const startCol = line.indexOf(rawValue);
