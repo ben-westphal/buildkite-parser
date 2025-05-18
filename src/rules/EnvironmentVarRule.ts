@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
 import { Rule } from '../types/rule';
+import { ParserConfig } from '../parser/DocumentParser';
 
 export class EnvironmentVarRule implements Rule {
   private definedEnvVars: Set<string> = new Set();
   private usedEnvVars: { name: string, range: vscode.Range }[] = [];
   private inEnvSection = false;
 
-  initialize(): void {
-    this.definedEnvVars.clear();
+  initialize(_document: vscode.TextDocument, config: ParserConfig): void {
+    this.definedEnvVars = new Set(config.excludedEnvs || []);
     this.usedEnvVars = [];
     this.inEnvSection = false;
   }

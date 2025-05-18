@@ -6,7 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import { NoQuotedEnvRule } from '../rules/NoQuotedEnvRule';
 
-interface ParserConfig {
+export interface ParserConfig {
   rules?: Record<string, any>;
   excludedEnvs?: string[];
 }
@@ -47,7 +47,7 @@ export class DocumentParser {
       .filter(ruleConstructor => localConfig.rules?.[ruleConstructor.name] !== false)
       .map(ruleConstructor => new ruleConstructor(localConfig.excludedEnvs || []));
 
-    rules.forEach(rule => rule.initialize(document));
+    rules.forEach(rule => rule.initialize(document, localConfig));
 
     const lines = document.getText().split(/\r?\n/);
     lines.forEach((line, index) => {
