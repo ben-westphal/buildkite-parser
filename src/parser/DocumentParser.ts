@@ -64,7 +64,7 @@ export class DocumentParser {
     }
 
     const root = folders[0].uri.fsPath;
-    const configPath = path.join(root, '.buildkite', 'bkparse.config.json');
+    const configPath = path.join(root, '.buildkite', 'pipelint.config.json');
     if (!fs.existsSync(configPath)) {
       return {};
     }
@@ -76,7 +76,7 @@ export class DocumentParser {
       const allowedRoot = new Set(['rules', 'excludedEnvs']);
       for (const key of Object.keys(parsed)) {
         if (!allowedRoot.has(key)) {
-          throw new Error(`Unknown property "${key}" in bkparse.config.json`);
+          throw new Error(`Unknown property "${key}" in pipelint.config.json`);
         }
       }
 
@@ -89,13 +89,13 @@ export class DocumentParser {
       if (parsed.rules) {
         for (const r of Object.keys(parsed.rules)) {
           if (!allowedRules.has(r)) {
-            throw new Error(`Unknown rule "${r}" in bkparse.config.json.rules`);
+            throw new Error(`Unknown rule "${r}" in pipelint.config.json.rules`);
           }
         }
       }
 
       if (parsed.excludedEnvs && !Array.isArray(parsed.excludedEnvs)) {
-        throw new Error(`"excludedEnvs" must be an array in bkparse.config.json`);
+        throw new Error(`"excludedEnvs" must be an array in pipelint.config.json`);
       }
 
       return {

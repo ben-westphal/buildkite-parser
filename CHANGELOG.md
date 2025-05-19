@@ -4,6 +4,10 @@
 
 ### Bug Fixes
 
+### Other
+
+* Changed name of the package to Buildkite Pipelint
+
 ## 0.0.4
 
 * Added new rule allowing the user to check environment variables for quotes that would be included in the string.

@@ -1,6 +1,6 @@
-# Buildkite Parse
+# Buildkite Pipelint
 
-BuildkiteParse is a simple vscode extension that provides additional syntax highlighting to features specific
+Buildkite Pipelint is a simple vscode extension that provides additional syntax highlighting to features specific
 to buildkite pipeline.yml files that cannot be provided by simple json schemas.
 
 ## Features
@@ -13,7 +13,7 @@ Current features include the following:
 
 ## Configuration
 
-To configure the extension create a file called `bkparse.config.json` in your .buildkite directory.
+To configure the extension create a file called `pipelint.config.json` in your .buildkite directory.
 This file has type hinting for a better dx.
 
 ```

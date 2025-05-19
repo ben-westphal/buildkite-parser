@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
   const folders = vscode.workspace.workspaceFolders;
   if (folders && folders.length > 0) {
     const root = folders[0];
-    const pattern = new vscode.RelativePattern(root, '.buildkite/bkparse.config.json');
+    const pattern = new vscode.RelativePattern(root, '.buildkite/pipelint.config.json');
     const configWatcher = vscode.workspace.createFileSystemWatcher(pattern);
 
     context.subscriptions.push(
