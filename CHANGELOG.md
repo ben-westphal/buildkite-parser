@@ -4,9 +4,13 @@
 
 ### Bug Fixes
 
+* Json schema now correctly recognized for type hints in config
+* Fixed bug where rules booleans in config were not correctly used
+
 ### Other
 
 * Changed name of the package to Buildkite Pipelint
+* Changed config to match new package name
 
 ## 0.0.4
 
