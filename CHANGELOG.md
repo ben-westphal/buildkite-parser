@@ -11,6 +11,7 @@
 
 * Changed name of the package to Buildkite Pipelint
 * Changed config to match new package name
+* Changed the name of excludedEnvs to whitelistedEnvs
 
 ## 0.0.4
 

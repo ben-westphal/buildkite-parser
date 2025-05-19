@@ -1,8 +1,8 @@
 {
   "rules": {
-    "DependsOnRule": true,
-    "EnvironmentVarRule": true,
-    "NoQuotedEnvRule": true
+    "DependsOnRule": false,
+    "EnvironmentVarRule": false,
+    "NoQuotedEnvRule": false
   },
-  "excludedEnvs": ["CI", "PATH", "BUILDKITE_S3_DEFAULT_REGIO"]
+  "whitelistedEnvs": ["CI", "PATH", "BUILDKITE_S3_DEFAULT_REGIO"]
 }

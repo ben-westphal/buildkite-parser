@@ -8,7 +8,7 @@ import { NoQuotedEnvRule } from '../rules/NoQuotedEnvRule';
 
 export interface ParserConfig {
   rules?: Record<string, any>;
-  excludedEnvs?: string[];
+  whitelistedEnvs?: string[];
 }
 
 export class DocumentParser {
@@ -19,7 +19,7 @@ export class DocumentParser {
     const defaults = this.defaultConfig();
     this.config = {
       rules: { ...defaults.rules, ...userConfig.rules },
-      excludedEnvs: userConfig.excludedEnvs || [],
+      whitelistedEnvs: userConfig.whitelistedEnvs || [],
     };
   }
 
@@ -30,14 +30,14 @@ export class DocumentParser {
         EnvironmentVarRule: true,
         NoQuotedEnvRule: true,
       },
-      excludedEnvs: [],
+      whitelistedEnvs: [],
     };
   }
 
   parse(document: vscode.TextDocument): vscode.Diagnostic[] {
     const localConfig = this.config;
 
-    const ruleConstructors: Array<new (excludedEnvs?: string[]) => Rule> = [
+    const ruleConstructors: Array<new (whitelistedEnvs?: string[]) => Rule> = [
       DependsOnRule,
       EnvironmentVarRule,
       NoQuotedEnvRule
@@ -45,7 +45,7 @@ export class DocumentParser {
 
     const rules = ruleConstructors
       .filter(ruleConstructor => localConfig.rules?.[ruleConstructor.name] !== false)
-      .map(ruleConstructor => new ruleConstructor(localConfig.excludedEnvs || []));
+      .map(ruleConstructor => new ruleConstructor(localConfig.whitelistedEnvs || []));
 
     rules.forEach(rule => rule.initialize(document, localConfig));
 
@@ -73,7 +73,7 @@ export class DocumentParser {
       const raw = fs.readFileSync(configPath, 'utf8');
       const parsed = JSON.parse(raw);
 
-      const allowedRoot = new Set(['rules', 'excludedEnvs']);
+      const allowedRoot = new Set(['rules', 'whitelistedEnvs']);
       for (const key of Object.keys(parsed)) {
         if (!allowedRoot.has(key)) {
           throw new Error(`Unknown property "${key}" in pipelint.config.json`);
@@ -94,13 +94,13 @@ export class DocumentParser {
         }
       }
 
-      if (parsed.excludedEnvs && !Array.isArray(parsed.excludedEnvs)) {
-        throw new Error(`"excludedEnvs" must be an array in pipelint.config.json`);
+      if (parsed.whitelistedEnvs && !Array.isArray(parsed.whitelistedEnvs)) {
+        throw new Error(`"whitelistedEnvs" must be an array in pipelint.config.json`);
       }
 
       return {
         rules: parsed.rules,
-        excludedEnvs: parsed.excludedEnvs,
+        whitelistedEnvs: parsed.whitelistedEnvs,
       };
     } catch (err: unknown) {
       const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : err;

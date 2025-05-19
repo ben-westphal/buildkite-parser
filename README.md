@@ -23,11 +23,11 @@ This file has type hinting for a better dx.
     "EnvironmentVarRule": false,
     "NoQuotedEnvRule": true
   },
-  "excludedEnvs": ["CI", "PATH", "GLOBAL_TF_BACKEND_S3_REGION"]
+  "whitelistedEnvs": ["CI", "PATH", "GLOBAL_TF_BACKEND_S3_REGION"]
 }
 ```
 
-ExcludedEnvs should be environment variables that you may be injecting from outside the pipeline. Add them to this array to exempt them from the `EnvironmentVarRule`.
+WhitelistedEnvs should be environment variables that you may be injecting from outside the pipeline. Add them to this array to exempt them from the `EnvironmentVarRule`.
 
 
 ## Known Issues
