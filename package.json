@@ -38,6 +38,10 @@
       }
     ]
   },
+  "files": [
+    "out/",
+    "src/schemas/*.json"
+  ],
   "publisher": "TheDome",
   "icon": "images/icon.png",
   "scripts": {

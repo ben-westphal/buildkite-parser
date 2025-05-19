@@ -62,6 +62,8 @@ Or you can throw a buildkite pipeline in there to have a play with.
 
 ## Building from source
 
+`npm run build-version` will compile a vsix file that can be used in vscode.
+
 ## Roadmap
 
 Below are the current features in development

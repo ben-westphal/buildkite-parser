@@ -52,7 +52,7 @@ export class NoQuotedEnvRule implements Rule {
     const diagnostics = this.violations.map(v => new vscode.Diagnostic(
       v.range,
       `Environment variable "${v.name}" could be incorrectly quoted.`,
-      vscode.DiagnosticSeverity.Error
+      vscode.DiagnosticSeverity.Warning
     ));
     this.violations = [];
     return diagnostics;
