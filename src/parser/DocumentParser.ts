@@ -12,6 +12,10 @@ export interface ParserConfig {
 }
 
 export class DocumentParser {
+  constructor() {
+    this.reloadConfig();
+  }
+
   private config: ParserConfig = {};
 
   public reloadConfig(): void {
