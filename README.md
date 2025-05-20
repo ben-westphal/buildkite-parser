@@ -1,6 +1,6 @@
-# Buildkite Parse
+# Buildkite Pipelint
 
-BuildkiteParse is a simple vscode extension that provides additional syntax highlighting to features specific
+Buildkite Pipelint is a simple vscode extension that provides additional syntax highlighting to features specific
 to buildkite pipeline.yml files that cannot be provided by simple json schemas.
 
 ## Features
@@ -13,7 +13,7 @@ Current features include the following:
 
 ## Configuration
 
-To configure the extension create a file called `bkparse.config.json` in your .buildkite directory.
+To configure the extension create a file called `pipelint.config.json` in your .buildkite directory.
 This file has type hinting for a better dx.
 
 ```
@@ -23,11 +23,11 @@ This file has type hinting for a better dx.
     "EnvironmentVarRule": false,
     "NoQuotedEnvRule": true
   },
-  "excludedEnvs": ["CI", "PATH", "GLOBAL_TF_BACKEND_S3_REGION"]
+  "whitelistedEnvs": ["CI", "PATH", "GLOBAL_TF_BACKEND_S3_REGION"]
 }
 ```
 
-ExcludedEnvs should be environment variables that you may be injecting from outside the pipeline. Add them to this array to exempt them from the `EnvironmentVarRule`.
+WhitelistedEnvs should be environment variables that you may be injecting from outside the pipeline. Add them to this array to exempt them from the `EnvironmentVarRule`.
 
 
 ## Known Issues
@@ -60,7 +60,13 @@ This will open a vscode instance with the extension running. The test-pipelines 
 
 Or you can throw a buildkite pipeline in there to have a play with.
 
+To test a built vsix file run `npm run build-version` and then take the vsix file from the dist directory and run
+
+`code --install-extension /dist/buildkite-parse-0.0.4.vsix`
+
 ## Building from source
+
+`npm run build-version` will compile a vsix file that can be used in vscode.
 
 ## Roadmap
 

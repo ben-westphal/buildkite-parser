@@ -13,7 +13,7 @@
         "NoQuotedEnvRule": { "type": "boolean" }
       }
     },
-    "excludedEnvs": {
+    "whitelistedEnvs": {
       "type": "array",
       "items": { "type": "string" }
     }

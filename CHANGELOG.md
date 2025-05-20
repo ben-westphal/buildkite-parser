@@ -1,5 +1,30 @@
 # Change Log
 
+## 0.0.5
+
+### Bug Fixes
+
+* Json schema now correctly recognized for type hints in config
+* Fixed bug where rules booleans in config were not correctly used
+
+### Other
+
+* Changed name of the package to Buildkite Pipelint
+* Changed config to match new package name
+* Changed the name of excludedEnvs to whitelistedEnvs
+
+## 0.0.4
+
+* Added new rule allowing the user to check environment variables for quotes that would be included in the string.
+
+Eg: It will provide a warning for the following: `REALLY_COOL_ENVIRONMENT: "super-cool-environment"` as the double quotes will end up included in the string.
+This often happens when someone copy pastes the variable from another environment which will parse the quoting as expected.
+It can be turned on and off in your config file with the value `NoQuotedEnvRule: boolean`
+
+* Added a config file
+
+This config file can be added to your .buildkite directory to turn specific rules on and off, as well as add in external environment variables that may be injected from outside your pipeline.
+
 ## 0.0.3
 
 ### Bug Fixes

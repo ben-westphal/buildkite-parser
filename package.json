@@ -1,8 +1,8 @@
 {
-  "name": "buildkite-parse",
-  "displayName": "buildkite-parse",
-  "description": "",
-  "version": "0.0.4",
+  "name": "buildkite-pipelint",
+  "displayName": "Buildkite Pipelint",
+  "description": "A simple VSCode extension to validate Buildkite pipeline YAML files.",
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.95.0"
   },
@@ -10,6 +10,10 @@
   "categories": [
     "Other"
   ],
+  "author": {
+    "name": "Ben Westphal",
+    "url": "https://linkedin.com/in/benjamin-westphal-763324197"
+  },
   "activationEvents": [
     "onLanguage:yaml",
     "onLanguage:json",
@@ -25,16 +29,10 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "buildkite-parse.helloWorld",
-        "title": "Buildkite Parser Active"
-      }
-    ],
     "jsonValidation": [
       {
-        "fileMatch": ["bkparse.config.json"],
-        "url": "./src/schemas/bkparse.config.schema.json"
+        "fileMatch": ["pipelint.config.json"],
+        "url": "./src/schemas/pipelint.config.schema.json"
       }
     ]
   },

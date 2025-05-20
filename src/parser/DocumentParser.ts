@@ -8,10 +8,14 @@ import { NoQuotedEnvRule } from '../rules/NoQuotedEnvRule';
 
 export interface ParserConfig {
   rules?: Record<string, any>;
-  excludedEnvs?: string[];
+  whitelistedEnvs?: string[];
 }
 
 export class DocumentParser {
+  constructor() {
+    this.reloadConfig();
+  }
+
   private config: ParserConfig = {};
 
   public reloadConfig(): void {
@@ -19,7 +23,7 @@ export class DocumentParser {
     const defaults = this.defaultConfig();
     this.config = {
       rules: { ...defaults.rules, ...userConfig.rules },
-      excludedEnvs: userConfig.excludedEnvs || [],
+      whitelistedEnvs: userConfig.whitelistedEnvs || [],
     };
   }
 
@@ -30,14 +34,14 @@ export class DocumentParser {
         EnvironmentVarRule: true,
         NoQuotedEnvRule: true,
       },
-      excludedEnvs: [],
+      whitelistedEnvs: [],
     };
   }
 
   parse(document: vscode.TextDocument): vscode.Diagnostic[] {
     const localConfig = this.config;
 
-    const ruleConstructors: Array<new (excludedEnvs?: string[]) => Rule> = [
+    const ruleConstructors: Array<new (whitelistedEnvs?: string[]) => Rule> = [
       DependsOnRule,
       EnvironmentVarRule,
       NoQuotedEnvRule
@@ -45,7 +49,7 @@ export class DocumentParser {
 
     const rules = ruleConstructors
       .filter(ruleConstructor => localConfig.rules?.[ruleConstructor.name] !== false)
-      .map(ruleConstructor => new ruleConstructor(localConfig.excludedEnvs || []));
+      .map(ruleConstructor => new ruleConstructor(localConfig.whitelistedEnvs || []));
 
     rules.forEach(rule => rule.initialize(document, localConfig));
 
@@ -64,7 +68,7 @@ export class DocumentParser {
     }
 
     const root = folders[0].uri.fsPath;
-    const configPath = path.join(root, '.buildkite', 'bkparse.config.json');
+    const configPath = path.join(root, '.buildkite', 'pipelint.config.json');
     if (!fs.existsSync(configPath)) {
       return {};
     }
@@ -73,10 +77,10 @@ export class DocumentParser {
       const raw = fs.readFileSync(configPath, 'utf8');
       const parsed = JSON.parse(raw);
 
-      const allowedRoot = new Set(['rules', 'excludedEnvs']);
+      const allowedRoot = new Set(['rules', 'whitelistedEnvs']);
       for (const key of Object.keys(parsed)) {
         if (!allowedRoot.has(key)) {
-          throw new Error(`Unknown property "${key}" in bkparse.config.json`);
+          throw new Error(`Unknown property "${key}" in pipelint.config.json`);
         }
       }
 
@@ -89,18 +93,18 @@ export class DocumentParser {
       if (parsed.rules) {
         for (const r of Object.keys(parsed.rules)) {
           if (!allowedRules.has(r)) {
-            throw new Error(`Unknown rule "${r}" in bkparse.config.json.rules`);
+            throw new Error(`Unknown rule "${r}" in pipelint.config.json.rules`);
           }
         }
       }
 
-      if (parsed.excludedEnvs && !Array.isArray(parsed.excludedEnvs)) {
-        throw new Error(`"excludedEnvs" must be an array in bkparse.config.json`);
+      if (parsed.whitelistedEnvs && !Array.isArray(parsed.whitelistedEnvs)) {
+        throw new Error(`"whitelistedEnvs" must be an array in pipelint.config.json`);
       }
 
       return {
         rules: parsed.rules,
-        excludedEnvs: parsed.excludedEnvs,
+        whitelistedEnvs: parsed.whitelistedEnvs,
       };
     } catch (err: unknown) {
       const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : err;

@@ -8,7 +8,7 @@ export class EnvironmentVarRule implements Rule {
   private inEnvSection = false;
 
   initialize(_document: vscode.TextDocument, config: ParserConfig): void {
-    this.definedEnvVars = new Set(config.excludedEnvs || []);
+    this.definedEnvVars = new Set(config.whitelistedEnvs || []);
     this.usedEnvVars = [];
     this.inEnvSection = false;
   }
