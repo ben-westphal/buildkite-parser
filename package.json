@@ -1,5 +1,5 @@
 {
-  "name": "buildkite-parse",
+  "name": "buildkite-pipelint",
   "displayName": "Buildkite Pipelint",
   "description": "A simple VSCode extension to validate Buildkite pipeline YAML files.",
   "version": "0.0.5",
@@ -36,10 +36,6 @@
       }
     ]
   },
-  "files": [
-    "out/",
-    "src/schemas/*.json"
-  ],
   "publisher": "TheDome",
   "icon": "images/icon.png",
   "scripts": {

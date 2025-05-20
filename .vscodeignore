@@ -12,3 +12,9 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+test/**
+
+# needed to include the .json files as raw in the extension
+# as they can't be bundled into the js
+!src/schemas/
+!src/schemas/**/*.json

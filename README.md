@@ -60,6 +60,10 @@ This will open a vscode instance with the extension running. The test-pipelines 
 
 Or you can throw a buildkite pipeline in there to have a play with.
 
+To test a built vsix file run `npm run build-version` and then take the vsix file from the dist directory and run
+
+`code --install-extension /dist/buildkite-parse-0.0.4.vsix`
+
 ## Building from source
 
 `npm run build-version` will compile a vsix file that can be used in vscode.
