@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # any semver tag :contentReference[oaicite:1]{index=1}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed for creating releases
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Get package version
+        id: get_version
+        run: |
+          echo "version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
+
+      - name: Install vsce (VS Code Extension CLI)
+        run: npm install -g vsce
+
+      - name: Package VSIX
+        run: npx vsce package --out extension-${{ steps.get_version.outputs.version }}.vsix
+
+      - name: Publish to Visual Studio Marketplace
+        uses: HaaLeo/publish-vscode-extension@v2
+        with:
+          pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}         # your publishing PAT
+          registryUrl: https://marketplace.visualstudio.com  # publish to VS Code Marketplace :contentReference[oaicite:2]{index=2}
+
+      - name: Generate release notes from CHANGELOG.md
+        id: changelogs
+        uses: heineiuo/create-changelogs@v0.2.8             # parses your CHANGELOG.md :contentReference[oaicite:3]{index=3}
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: ${{ steps.changelogs.outputs.changelogs }}
+          artifacts: extension-${{ steps.get_version.outputs.version }}.vsix  # attach the vsix :contentReference[oaicite:4]{index=4}
