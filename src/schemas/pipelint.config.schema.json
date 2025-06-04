@@ -8,14 +8,25 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "DependsOnRule":   { "type": "boolean" },
-        "EnvironmentVarRule": { "type": "boolean" },
-        "NoQuotedEnvRule": { "type": "boolean" }
+        "DependsOnRule": {
+          "type": "boolean"
+        },
+        "EnvironmentVarRule": {
+          "type": "boolean"
+        },
+        "NoQuotedEnvRule": {
+          "type": "boolean"
+        }
       }
     },
     "whitelistedEnvs": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
+    },
+    "bashExperimental": {
+      "type": "boolean"
     }
   }
 }

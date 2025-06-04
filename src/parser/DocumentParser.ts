@@ -25,10 +25,13 @@ export class DocumentParser {
     this.config = {
       rules: { ...defaults.rules, ...userConfig.rules || {} },
       whitelistedEnvs: userConfig.whitelistedEnvs || [],
+      ...defaults,
+      ...userConfig
     };
   }
 
   public getConfig(): ParserConfig {
+    console.log(this.config);
     return this.config;
   }
 
@@ -40,6 +43,7 @@ export class DocumentParser {
         NoQuotedEnvRule: true,
       },
       whitelistedEnvs: [],
+      bashExperimental: false
     };
   }
 
@@ -82,7 +86,7 @@ export class DocumentParser {
       const raw = fs.readFileSync(configPath, 'utf8');
       const parsed = JSON.parse(raw);
 
-      const allowedRoot = new Set(['rules', 'whitelistedEnvs']);
+      const allowedRoot = new Set(['rules', 'whitelistedEnvs', 'bashExperimental']);
       for (const key of Object.keys(parsed)) {
         if (!allowedRoot.has(key)) {
           throw new Error(`Unknown property "${key}" in pipelint.config.json`);
@@ -107,10 +111,19 @@ export class DocumentParser {
         throw new Error(`"whitelistedEnvs" must be an array in pipelint.config.json`);
       }
 
+      let bashExperimentalValid = false;
+      if (typeof parsed.bashExperimental !== 'boolean') {
+        throw new Error('bashExperimental should be a boolean');
+      } else {
+        bashExperimentalValid = true;
+      }
+
       return {
         rules: parsed.rules,
         whitelistedEnvs: parsed.whitelistedEnvs,
+        bashExperimental: bashExperimentalValid ? parsed.bashExperimental : false
       };
+
     } catch (err: unknown) {
       const message = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : err;
       console.error('Failed loading config:', message);

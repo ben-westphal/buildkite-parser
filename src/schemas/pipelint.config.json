@@ -4,5 +4,9 @@
     "EnvironmentVarRule": true,
     "NoQuotedEnvRule": true
   },
-  "whitelistedEnvs": ["CI", "PATH"]
+  "whitelistedEnvs": [
+    "CI",
+    "PATH"
+  ],
+  "bashExperimental": false
 }
