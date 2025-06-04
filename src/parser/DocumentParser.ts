@@ -7,8 +7,9 @@ import fs from 'fs';
 import { NoQuotedEnvRule } from '../rules/NoQuotedEnvRule';
 
 export interface ParserConfig {
-  rules?: Record<string, any>;
-  whitelistedEnvs?: string[];
+  rules?: Record<string, boolean>
+  whitelistedEnvs?: string[]
+  bashExperimental?: boolean
 }
 
 export class DocumentParser {
@@ -22,9 +23,13 @@ export class DocumentParser {
     const userConfig = this.loadConfig();
     const defaults = this.defaultConfig();
     this.config = {
-      rules: { ...defaults.rules, ...userConfig.rules },
+      rules: { ...defaults.rules, ...userConfig.rules || {} },
       whitelistedEnvs: userConfig.whitelistedEnvs || [],
     };
+  }
+
+  public getConfig(): ParserConfig {
+    return this.config;
   }
 
   private defaultConfig(): ParserConfig {

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DocumentParser } from './parser/DocumentParser';
+import { shouldParse } from './helpers/shouldParse';
 
 const diagnosticCollection = vscode.languages.createDiagnosticCollection('buildkite');
 
@@ -9,10 +10,11 @@ export function activate(context: vscode.ExtensionContext) {
   const parser = new DocumentParser();
 
   const parseDoc = (document: vscode.TextDocument) => {
-    if (!/(buildkite|pipeline).*\.ya?ml$/.test(document.fileName)) {
+    if (!shouldParse(document.fileName, parser.getConfig())) {
       diagnosticCollection.delete(document.uri);
       return;
     }
+
     diagnosticCollection.delete(document.uri);
     const diagnostics = parser.parse(document);
     diagnosticCollection.set(document.uri, diagnostics);
