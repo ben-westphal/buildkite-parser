@@ -1,7 +1,7 @@
 env:
   BUILDKITE_ARTIFACT_UPLOAD_DESTINATION: s3://vivi-buildkite-artifacts/$BUILDKITE_JOB_ID
   BUILDKITE_S3_DEFAULT_REGION: ap-southeast-2
-  DELETE_DATABASE: 'vivi-primary'
+  DELETE_DATABASE: 'vivi-primary
   REALLY_COOL_ENVIRONMENT: "super-cool-environment"
 
 steps:

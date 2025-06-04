@@ -77,3 +77,5 @@ Below are the current features in development
 * Npm install it as a package instead
 * Migrate to pnpm for package installation
 * Add github action to handle publishing versions
+* Add quick fixes for common issues
+* Add rule suppression options for things like quoted envs that actually need to be

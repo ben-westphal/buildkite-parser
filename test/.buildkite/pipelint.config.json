@@ -4,5 +4,9 @@
     "EnvironmentVarRule": true,
     "NoQuotedEnvRule": true
   },
-  "whitelistedEnvs": ["CI", "PATH", "BUILDKITE_S3_DEFAULT_REGIO"]
+  "whitelistedEnvs": [
+    "CI",
+    "PATH",
+    "BUILDKITE_S3_DEFAULT_REGIO"
+  ]
 }
